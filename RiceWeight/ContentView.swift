@@ -106,6 +106,13 @@ struct ContentView: View {
             //.navigationBarTitleDisplayMode(.inline)
             // `toolbar` 用于配置导航栏上的操作按钮。
             .toolbar {
+                // `NavigationLink` 点击后会把趋势页面推入当前 NavigationStack。
+                NavigationLink {
+                    WeightChartView()
+                } label: {
+                    Label(L10n.showChart, systemImage: "chart.xyaxis.line")
+                }
+
                 // 在导航栏中加入齿轮按钮，点击后显示语言设置页。
                 Button {
                     isShowingSettings = true

@@ -23,9 +23,10 @@ RiceWeight 是一个用于学习 iOS、Swift 和 SwiftUI 的体重记录 Demo。
 - 计算距离目标还差多少
 - 新增体重记录
 - 查看并左滑删除历史记录
+- 使用折线图查看体重变化趋势和固定目标体重参考线
 - 支持日语、简体中文和英文
 - 在设置页中选择语言，并在重新启动 App 后生效
-- 根据用户地区格式化日期和数字
+- 根据用户地区格式化日期、时间和数字
 - 使用 SwiftData 将体重记录保存在 App 本地数据库中
 
 ## 当前限制
@@ -34,7 +35,7 @@ RiceWeight 是一个用于学习 iOS、Swift 和 SwiftUI 的体重记录 Demo。
 
 - 目标体重暂时固定为 `75.0 kg`
 - 卸载 App 后，本地数据库会被删除，暂时没有云端同步
-- 暂时没有图表
+- 图表暂时没有时间范围筛选和选点交互
 - 暂时没有单元测试和 UI 测试
 
 ## 主要文件
@@ -42,6 +43,7 @@ RiceWeight 是一个用于学习 iOS、Swift 和 SwiftUI 的体重记录 Demo。
 - `RiceWeight/RiceWeightApp.swift`：App 入口、Locale 注入和 SwiftData 容器
 - `RiceWeight/WeightRecord.swift`：SwiftData 体重记录模型
 - `RiceWeight/ContentView.swift`：首页、数据库查询、新增和删除逻辑
+- `RiceWeight/WeightChartView.swift`：趋势图、数据点和目标体重参考线
 - `RiceWeight/AddWeightRecordView.swift`：新增记录弹窗和闭包回传
 - `RiceWeight/SettingsView.swift`：语言设置页面
 - `RiceWeight/AppLanguage.swift`：支持语言、UserDefaults 和 Bundle

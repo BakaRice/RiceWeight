@@ -27,6 +27,7 @@ enum L10n {
     static var remainingWeight: String { text("home.summary.remaining", fallback: "目標まで") }
     static var reachedTarget: String { text("home.summary.reached", fallback: "目標達成") }
     static var addRecord: String { text("action.addRecord", fallback: "記録を追加") }
+    static var showChart: String { text("action.showChart", fallback: "推移を見る") }
     static var cancel: String { text("action.cancel", fallback: "キャンセル") }
     static var save: String { text("action.save", fallback: "保存") }
     static var done: String { text("action.done", fallback: "完了") }
@@ -35,9 +36,13 @@ enum L10n {
     static var weight: String { text("add.weight", fallback: "体重") }
     static var decimalDigit: String { text("add.weight.decimalDigit", fallback: "小数") }
     static var date: String { text("add.date", fallback: "日付") }
+    static var time: String { text("add.time", fallback: "時刻") }
     static var settingsTitle: String { text("settings.title", fallback: "設定") }
     static var language: String { text("settings.language", fallback: "言語") }
     static var restartHint: String { text("settings.restartHint", fallback: "変更はアプリの再起動後に反映されます。") }
+    static var chartTitle: String { text("chart.title", fallback: "体重の推移") }
+    static var chartEmpty: String { text("chart.empty", fallback: "体重を記録すると、ここに推移が表示されます。") }
+    static var chartTarget: String { text("chart.target", fallback: "目標") }
     static var kilogramShort: String { text("unit.kilogram.short", fallback: "kg") }
 
     /// 根据 App 启动时确定的语言，从对应 Bundle 中读取翻译。

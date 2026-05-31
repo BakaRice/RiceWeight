@@ -23,6 +23,13 @@ struct AddWeightRecordView: View {
     /// 从父页面读取当前语言环境，让数字展示格式和 App 内语言保持一致。
     @Environment(\.locale) private var locale
 
+    /// 还有其他类似的玩法
+    /// @Environment(\.colorScheme) private var colorScheme
+    /// @Environment(\.locale) private var locale
+    /// @Environment(\.calendar) private var calendar
+    /// @Environment(\.timeZone) private var timeZone
+    /// @Environment(\.dismiss) private var dismiss
+
     /// `@State` 表示视图自己拥有、并且会随交互变化的数据。
     /// 当这些值改变时，SwiftUI 会重新计算 `body`，刷新受影响的界面。
     ///
@@ -116,16 +123,25 @@ struct AddWeightRecordView: View {
                         .frame(height: 150)
                     }
 
-                    // `DatePicker` 是系统日期选择器。
+                    // 第一行 DatePicker 只负责选择日期。
                     DatePicker(
                         // 第一项参数是在日期选择器左侧展示的本地化标题。
                         L10n.date,
                         // `$selectedDate` 让选择器和状态值双向同步。
                         selection: $selectedDate,
-                        // `...Date()` 是闭区间语法，表示只允许选择今天及以前的日期。
+                        // `...Date()` 是闭区间语法，表示只允许选择当前时间及以前的时间。
                         in: ...Date(),
-                        // 这里只需要日期，不需要具体时间。
+                        // 这一行只展示年月日。
                         displayedComponents: .date
+                    )
+
+                    // 第二行 DatePicker 只负责选择小时和分钟。
+                    // 两行绑定到同一个 selectedDate，因此最终仍然得到一个完整时间点。
+                    DatePicker(
+                        L10n.time,
+                        selection: $selectedDate,
+                        in: ...Date(),
+                        displayedComponents: .hourAndMinute
                     )
                 }
             }

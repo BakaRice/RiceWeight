@@ -12,10 +12,11 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 - 新增一条体重记录
 - 查看历史记录
 - 左滑删除历史记录
+- 使用折线图查看体重变化趋势和固定目标体重参考线
 - 使用 SwiftData 将体重记录保存到本地数据库
 - 支持日语、简体中文和英文文案
 - 支持在 App 设置页中选择语言，并在重新启动 App 后生效
-- 根据用户地区格式化日期、数字和小数输入
+- 根据用户地区格式化日期、时间、数字和小数输入
 
 ## 当前限制
 
@@ -61,22 +62,29 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
    - `.sheet`
    - `.onDelete`
 
-4. `RiceWeight/AddWeightRecordView.swift`
+4. `RiceWeight/WeightChartView.swift`
+   - 使用 `Charts` 绘制体重趋势图
+   - `LineMark`
+   - `PointMark`
+   - `RuleMark`
+
+5. `RiceWeight/AddWeightRecordView.swift`
    - 新增记录弹窗
    - `Form`
    - `Picker`
    - `DatePicker`
+   - 使用两个 `DatePicker` 分别输入日期和时间
    - `$` 双向绑定
    - `@Environment`
    - 闭包回传数据
 
-5. `RiceWeight/L10n.swift`
+6. `RiceWeight/L10n.swift`
    - 集中管理国际化文案 key
    - `enum`
    - `static var`
    - `Bundle.localizedString(forKey:value:table:)`
 
-6. `RiceWeight/AppLanguage.swift`
+7. `RiceWeight/AppLanguage.swift`
    - App 支持的语言列表
    - `enum`
    - `CaseIterable`
@@ -84,12 +92,12 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
    - `Locale`
    - `Bundle`
 
-7. `RiceWeight/SettingsView.swift`
+8. `RiceWeight/SettingsView.swift`
    - App 内语言切换页面
    - `@AppStorage`
    - `Picker`
 
-8. `RiceWeight/Localizable.xcstrings`
+9. `RiceWeight/Localizable.xcstrings`
    - 日语、简体中文和英文翻译
    - String Catalog 的基本结构
 
@@ -265,6 +273,7 @@ English
 国际化不仅包括翻译，也包括数字和日期格式。
 
 - 日期通过 SwiftUI 的 `Date.FormatStyle` 展示，会自动适配地区顺序。
+- 新增记录时默认使用当前时间，用户也可以分别修改日期、小时和分钟。
 - 数字通过 `formatted(.number...)` 展示，会自动适配小数点或小数逗号。
 - 体重通过整数和小数两个滚轮选择，避免用户输入无效数字。
 - 新增记录时，滚轮默认显示最近一次体重；没有历史记录时使用 `65.5 kg`。
@@ -276,6 +285,7 @@ RiceWeight/
 ├── RiceWeightApp.swift          # App 入口
 ├── WeightRecord.swift           # SwiftData 本地数据库模型
 ├── ContentView.swift            # 首页、概览和历史记录列表
+├── WeightChartView.swift        # 体重趋势折线图和目标体重参考线
 ├── AddWeightRecordView.swift    # 新增记录弹窗
 ├── AppLanguage.swift            # App 支持的语言和语言偏好读取逻辑
 ├── SettingsView.swift           # App 内语言切换页面
@@ -287,6 +297,6 @@ RiceWeight/
 ## 后续学习路线
 
 1. 增加目标体重设置页面。
-2. 使用图表展示体重变化趋势。
+2. 为趋势图增加时间范围筛选和选点交互。
 3. 使用 iCloud 或服务器同步数据。
 4. 增加单元测试和 UI 测试。
