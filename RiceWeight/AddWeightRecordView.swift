@@ -20,6 +20,9 @@ struct AddWeightRecordView: View {
     /// `\.dismiss` 是 KeyPath（键路径）语法，表示我们想读取名为 dismiss 的环境值。
     @Environment(\.dismiss) private var dismiss
 
+    /// 从父页面读取当前语言环境，让数字输入规则和 App 内语言保持一致。
+    @Environment(\.locale) private var locale
+
     /// `@State` 表示视图自己拥有、并且会随交互变化的数据。
     /// 当这些值改变时，SwiftUI 会重新计算 `body`，刷新受影响的界面。
     ///
@@ -44,6 +47,9 @@ struct AddWeightRecordView: View {
 
         // `.decimal` 表示按照普通十进制数字处理输入内容。
         formatter.numberStyle = .decimal
+
+        // 使用 App 内选择的语言环境，兼容不同地区的小数格式。
+        formatter.locale = locale
 
         // `number(from:)` 尝试把字符串变成 NSNumber；失败时返回 nil。
         // `?.doubleValue` 表示：仅在解析成功时继续读取 Double 类型的数值。

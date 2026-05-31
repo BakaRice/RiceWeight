@@ -20,6 +20,8 @@ struct RiceWeightApp: App {
         WindowGroup {
             // 创建首页视图。SwiftUI 会把它显示在窗口中。
             ContentView()
+                // App 启动时确定语言环境。用户修改语言后，重新启动 App 才会生效。
+                .environment(\.locale, AppLanguage.launchLanguage.locale)
         }
     }
 }

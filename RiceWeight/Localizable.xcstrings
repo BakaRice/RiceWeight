@@ -1,99 +1,143 @@
 {
-  "sourceLanguage" : "en",
+  "sourceLanguage" : "ja",
   "strings" : {
     "action.addRecord" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Record" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "記録を追加" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新增记录" } }
       }
     },
     "action.cancel" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "キャンセル" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消" } }
+      }
+    },
+    "action.done" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "完了" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "完成" } }
       }
     },
     "action.save" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "保存" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } }
       }
     },
     "add.date" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Date" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "日付" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "日期" } }
       }
     },
     "add.section.details" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Record Details" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "記録内容" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "记录内容" } }
       }
     },
     "add.title" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Weight" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "体重を追加" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新增体重" } }
       }
     },
     "add.weight.placeholder" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "For example: 65.5" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "例：65.5" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "例如：65.5" } }
       }
     },
     "home.empty.description" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap the plus button in the top-right corner to record your first weight." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "右上のプラスボタンをタップして、最初の体重を記録しましょう。" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "点击右上角的加号，记录你的第一次体重。" } }
       }
     },
     "home.empty.title" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "No Records Yet" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "記録がありません" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "还没有记录" } }
       }
     },
     "home.history.section" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "History" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "履歴" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "历史记录" } }
       }
     },
     "home.summary.current" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Current Weight" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "現在の体重" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前体重" } }
       }
     },
     "home.summary.reached" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Target Reached" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "目標達成" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已达到目标" } }
       }
     },
     "home.summary.remaining" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Remaining" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "目標まで" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "距离目标" } }
       }
     },
     "home.summary.target" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Target Weight" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "目標体重" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "目标体重" } }
       }
     },
     "home.title" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Weight Records" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "体重記録" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "体重记录" } }
+      }
+    },
+    "settings.language" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Language" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "言語" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "语言" } }
+      }
+    },
+    "settings.restartHint" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Changes take effect after restarting the app." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "変更はアプリの再起動後に反映されます。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "更改将在重新启动 App 后生效。" } }
+      }
+    },
+    "settings.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "設定" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
       }
     },
     "unit.kilogram.short" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "kg" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "kg" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "kg" } }
       }
     }

@@ -12,16 +12,17 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 - 新增一条体重记录
 - 查看历史记录
 - 左滑删除历史记录
-- 支持英文和简体中文文案
+- 支持日语、简体中文和英文文案
+- 支持在 App 设置页中选择语言，并在重新启动 App 后生效
 - 根据用户地区格式化日期、数字和小数输入
 
 ## 当前限制
 
 - 体重记录仅保存在内存中。关闭 App 后，新增记录会消失。
 - 目标体重暂时固定为 `75.0 kg`。
-- App 会跟随系统或 iOS 中为 App 单独设置的语言，目前还没有 App 内语言切换页面。
+- App 第一次启动时默认使用日语。用户可以通过首页齿轮按钮切换语言。
 
-这些限制适合作为后续学习任务：使用 SwiftData 保存数据、增加目标体重设置页面、增加 App 内语言切换。
+这些限制适合作为后续学习任务：使用 SwiftData 保存数据、增加目标体重设置页面。
 
 ## 运行项目
 
@@ -69,11 +70,24 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 5. `RiceWeight/L10n.swift`
    - 集中管理国际化文案 key
    - `enum`
-   - `static let`
-   - `String(localized:)`
+   - `static var`
+   - `Bundle.localizedString(forKey:value:table:)`
 
-6. `RiceWeight/Localizable.xcstrings`
-   - 英文和简体中文翻译
+6. `RiceWeight/AppLanguage.swift`
+   - App 支持的语言列表
+   - `enum`
+   - `CaseIterable`
+   - `UserDefaults`
+   - `Locale`
+   - `Bundle`
+
+7. `RiceWeight/SettingsView.swift`
+   - App 内语言切换页面
+   - `@AppStorage`
+   - `Picker`
+
+8. `RiceWeight/Localizable.xcstrings`
+   - 日语、简体中文和英文翻译
    - String Catalog 的基本结构
 
 ## 数据流
@@ -170,38 +184,37 @@ Text("体重记录")
 L10n.homeTitle
 ```
 
-`L10n.swift` 使用稳定的语义 key：
+`L10n.swift` 使用稳定的语义 key，并在每次读取时查询用户当前选择的语言：
 
 ```swift
-static let homeTitle = String(
-    localized: "home.title",
-    defaultValue: "Weight Records"
-)
+static var homeTitle: String {
+    text("home.title", fallback: "体重記録")
+}
 ```
 
-翻译内容保存在 `Localizable.xcstrings`：
+翻译内容保存在 `Localizable.xcstrings`。日语是当前 App 的默认语言：
 
-| Key | English | 简体中文 |
-| --- | --- | --- |
-| `home.title` | `Weight Records` | `体重记录` |
-| `action.addRecord` | `Add Record` | `新增记录` |
-| `action.save` | `Save` | `保存` |
+| Key | 日本語 | English | 简体中文 |
+| --- | --- | --- | --- |
+| `home.title` | `体重記録` | `Weight Records` | `体重记录` |
+| `action.addRecord` | `記録を追加` | `Add Record` | `新增记录` |
+| `action.save` | `保存` | `Save` | `保存` |
 
 使用语义 key 的好处是：修改中文或英文文案时，不需要修改页面代码，也不会影响其他语言。
 
 ### 切换 App 语言
 
-可以在 iPhone 或 Simulator 中打开：
+点击首页右上角的齿轮按钮，可以在 App 内选择：
 
 ```text
-设置 → App → RiceWeight → 语言
+日本語
+简体中文
+English
 ```
 
-也可以在 Xcode 中打开：
+选择结果通过 `@AppStorage` 保存到 UserDefaults。为了避免页面中途切换语言，新的语言会在完全退出并重新启动 App 后生效。
 
-```text
-Scheme → Edit Scheme... → Run → Options → App Language
-```
+`RiceWeightApp.swift` 会在启动时向页面树注入对应的 `Locale`，因此日期和数字格式也会使用新选择的语言环境。
 
 ### 地区格式
 
@@ -219,8 +232,10 @@ RiceWeight/
 ├── WeightRecord.swift           # 体重记录模型
 ├── ContentView.swift            # 首页、概览和历史记录列表
 ├── AddWeightRecordView.swift    # 新增记录弹窗
+├── AppLanguage.swift            # App 支持的语言和语言偏好读取逻辑
+├── SettingsView.swift           # App 内语言切换页面
 ├── L10n.swift                   # 国际化文案入口
-├── Localizable.xcstrings        # 英文和简体中文翻译
+├── Localizable.xcstrings        # 日语、简体中文和英文翻译
 └── Assets.xcassets              # 图片、颜色和 App 图标资源
 ```
 
@@ -228,6 +243,5 @@ RiceWeight/
 
 1. 使用 SwiftData 持久化体重记录。
 2. 增加目标体重设置页面。
-3. 增加 App 内语言切换功能。
-4. 使用图表展示体重变化趋势。
-5. 增加单元测试和 UI 测试。
+3. 使用图表展示体重变化趋势。
+4. 增加单元测试和 UI 测试。

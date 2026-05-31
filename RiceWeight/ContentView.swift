@@ -30,6 +30,9 @@ struct ContentView: View {
     /// `false` 表示 App 启动时先不显示新增记录弹窗。
     @State private var isShowingAddRecord = false
 
+    /// 控制设置弹窗是否显示。
+    @State private var isShowingSettings = false
+
     /// 这是一个计算属性。每次使用它时，都返回按日期从新到旧排序后的记录数组。
     private var sortedRecords: [WeightRecord] {
         // `sorted` 不会修改原数组，而是返回新数组。
@@ -99,6 +102,13 @@ struct ContentView: View {
             //.navigationBarTitleDisplayMode(.inline)
             // `toolbar` 用于配置导航栏上的操作按钮。
             .toolbar {
+                // 在导航栏中加入齿轮按钮，点击后显示语言设置页。
+                Button {
+                    isShowingSettings = true
+                } label: {
+                    Label(L10n.settingsTitle, systemImage: "gearshape")
+                }
+
                 // 创建一个按钮。点击后会执行紧随其后的闭包。
                 Button {
                     // 修改 @State 后，SwiftUI 会重新计算 body，并显示弹窗。
@@ -116,6 +126,10 @@ struct ContentView: View {
                     // `append` 把弹窗返回的新记录添加到数组末尾。
                     records.append(newRecord)
                 })
+            }
+            // 根据 isShowingSettings 决定是否显示设置弹窗。
+            .sheet(isPresented: $isShowingSettings) {
+                SettingsView()
             }
         }
     }
@@ -137,6 +151,9 @@ struct ContentView: View {
 /// 首页顶部的概览卡片。
 /// 这里只接收展示所需的数据，不负责修改记录，因此全部使用常量属性。
 struct WeightSummaryView: View {
+    /// 从父视图读取当前语言环境，用于格式化数字。
+    @Environment(\.locale) private var locale
+
     // 这三个 `let` 都是由父视图传入、不会在当前子视图中修改的常量。
     let currentWeight: Double
     let targetWeight: Double
@@ -189,7 +206,11 @@ struct WeightSummaryView: View {
     /// `formatted` 会根据用户地区决定使用小数点还是小数逗号。
     private func formattedWeight(_ weight: Double) -> String {
         // `fractionLength(1)` 表示固定保留一位小数。
-        let number = weight.formatted(.number.precision(.fractionLength(1)))
+        let number = weight.formatted(
+            .number
+                .precision(.fractionLength(1))
+                .locale(locale)
+        )
 
         // 字符串插值 `\(变量)` 会把变量内容放入字符串中。
         return "\(number) \(L10n.kilogramShort)"
@@ -199,6 +220,9 @@ struct WeightSummaryView: View {
 /// 历史记录列表中的一行。
 /// 把它拆成独立视图后，首页的结构更容易阅读，也便于以后单独调整样式。
 struct WeightRecordRow: View {
+    /// 从父视图读取当前语言环境，用于格式化数字和日期。
+    @Environment(\.locale) private var locale
+
     // 父视图为每一行传入一条记录。
     let record: WeightRecord
 
@@ -224,7 +248,11 @@ struct WeightRecordRow: View {
     /// 历史记录行也需要展示体重，因此提供一个局部格式化方法。
     private func formattedWeight(_ weight: Double) -> String {
         // 根据用户地区格式化数字，并固定保留一位小数。
-        let number = weight.formatted(.number.precision(.fractionLength(1)))
+        let number = weight.formatted(
+            .number
+                .precision(.fractionLength(1))
+                .locale(locale)
+        )
 
         // 拼接格式化数字和本地化单位。
         return "\(number) \(L10n.kilogramShort)"
