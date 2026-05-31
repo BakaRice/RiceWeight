@@ -157,7 +157,7 @@ struct AddWeightRecordView: View {
     /// `private func` 声明仅在当前类型内部使用的方法。
     private func saveRecord() {
         // 创建 WeightRecord，并通过 onSave 闭包把新记录交回首页。
-        onSave(WeightRecord(weight: selectedWeight, date: selectedDate))
+        onSave(WeightRecord(weight: selectedWeight, measuredAt: selectedDate))
 
         // 保存成功后关闭弹窗。
         dismiss()

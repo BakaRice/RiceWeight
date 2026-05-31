@@ -8,6 +8,9 @@
 // 导入 SwiftUI 框架，才能使用 App、Scene、WindowGroup 和 View。
 import SwiftUI
 
+// 导入 SwiftData，才能为页面树配置本地数据库。
+import SwiftData
+
 /// `@main` 标记 App 的程序入口。
 /// iOS 启动应用时会先创建这个类型，再根据 `body` 中声明的场景构建界面。
 @main
@@ -22,6 +25,9 @@ struct RiceWeightApp: App {
             ContentView()
                 // App 启动时确定语言环境。用户修改语言后，重新启动 App 才会生效。
                 .environment(\.locale, AppLanguage.launchLanguage.locale)
+                // modelContainer 为页面树创建并注入 SwiftData 本地数据库。
+                // WeightRecord.self 表示这个数据库需要保存 WeightRecord 模型。
+                .modelContainer(for: WeightRecord.self)
         }
     }
 }

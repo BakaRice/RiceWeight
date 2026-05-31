@@ -12,17 +12,18 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 - 新增一条体重记录
 - 查看历史记录
 - 左滑删除历史记录
+- 使用 SwiftData 将体重记录保存到本地数据库
 - 支持日语、简体中文和英文文案
 - 支持在 App 设置页中选择语言，并在重新启动 App 后生效
 - 根据用户地区格式化日期、数字和小数输入
 
 ## 当前限制
 
-- 体重记录仅保存在内存中。关闭 App 后，新增记录会消失。
 - 目标体重暂时固定为 `75.0 kg`。
 - App 第一次启动时默认使用日语。用户可以通过首页齿轮按钮切换语言。
+- SwiftData 数据库保存在 App 本地沙箱中。卸载 App 后，本地记录会被删除。
 
-这些限制适合作为后续学习任务：使用 SwiftData 保存数据、增加目标体重设置页面。
+这些限制适合作为后续学习任务：增加目标体重设置页面、使用 iCloud 或服务器同步数据。
 
 ## 运行项目
 
@@ -39,21 +40,23 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
    - `@main`
    - `App`
    - `WindowGroup`
+   - `.modelContainer`
 
 2. `RiceWeight/WeightRecord.swift`
    - 一条体重记录的数据模型
-   - `struct`
-   - `let`
+   - `@Model`
+   - `class`
+   - `@Attribute(.unique)`
    - `Double`
    - `Date`
-   - `Identifiable`
 
 3. `RiceWeight/ContentView.swift`
    - 首页布局
    - `NavigationStack`
    - `List`
    - `Section`
-   - `@State`
+   - `@Query`
+   - `modelContext`
    - `ForEach`
    - `.sheet`
    - `.onDelete`
@@ -92,12 +95,21 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 
 ## 数据流
 
-首页 `ContentView` 拥有体重记录数组：
+App 入口通过 `.modelContainer` 创建 SwiftData 本地数据库：
 
 ```swift
-@State private var records = [
-    WeightRecord(weight: 103.6, date: Date())
-]
+.modelContainer(for: WeightRecord.self)
+```
+
+首页通过 `@Query` 从数据库读取体重记录：
+
+```swift
+@Query(
+    filter: #Predicate<WeightRecord> { $0.deletedAt == nil },
+    sort: \WeightRecord.measuredAt,
+    order: .reverse
+)
+private var records: [WeightRecord]
 ```
 
 点击首页加号后，SwiftUI 弹出 `AddWeightRecordView`。首页在创建弹窗时传入一个闭包：
@@ -106,7 +118,7 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 AddWeightRecordView(
     initialWeight: latestRecord?.weight ?? 65.5
 ) { newRecord in
-    records.append(newRecord)
+    modelContext.insert(newRecord)
 }
 ```
 
@@ -116,7 +128,7 @@ AddWeightRecordView(
 AddWeightRecordView(
     initialWeight: latestRecord?.weight ?? 65.5,
     onSave: { newRecord in
-        records.append(newRecord)
+        modelContext.insert(newRecord)
     }
 )
 ```
@@ -130,7 +142,7 @@ let onSave: (WeightRecord) -> Void
 用户点击保存后，新增页面创建一条记录，并调用首页传入的闭包：
 
 ```swift
-onSave(WeightRecord(weight: enteredWeight, date: selectedDate))
+onSave(WeightRecord(weight: selectedWeight, measuredAt: selectedDate))
 ```
 
 完整流程：
@@ -138,16 +150,45 @@ onSave(WeightRecord(weight: enteredWeight, date: selectedDate))
 ```text
 ContentView 把保存闭包交给 AddWeightRecordView
         ↓
-用户在 AddWeightRecordView 中输入体重并点击保存
+用户在 AddWeightRecordView 中选择体重并点击保存
         ↓
 AddWeightRecordView 创建 WeightRecord
         ↓
 AddWeightRecordView 调用 onSave(newRecord)
         ↓
-ContentView 执行 records.append(newRecord)
+ContentView 执行 modelContext.insert(newRecord)
         ↓
-@State 发生变化，SwiftUI 自动刷新首页
+SwiftData 保存记录，@Query 自动刷新首页
 ```
+
+## 本地数据库
+
+这个项目使用 Apple 提供的 SwiftData 保存体重记录，不需要安装第三方依赖。
+
+模型通过 `@Model` 声明：
+
+```swift
+@Model
+final class WeightRecord {
+    @Attribute(.unique) var id: UUID
+    var weight: Double
+    @Attribute(originalName: "date") var measuredAt: Date
+    var timeZoneIdentifier: String
+    var createdAt: Date
+    var updatedAt: Date
+    var deletedAt: Date?
+}
+```
+
+| 操作 | SwiftData API |
+| --- | --- |
+| 新增记录 | `modelContext.insert(newRecord)` |
+| 查询记录 | `@Query(...) private var records` |
+| 删除记录 | 设置 `deletedAt`，并由 `@Query` 隐藏软删除记录 |
+
+数据库位于 App 的本地沙箱中。完全退出并重新打开 App 后，记录仍然存在。卸载 App 后，iOS 会删除沙箱，因此记录也会被删除。
+
+`Date` 保存的是与时区无关的绝对时间点。模型额外保存 `timeZoneIdentifier`，用于在用户跨时区后仍按录入地点展示日期。`createdAt`、`updatedAt` 和 `deletedAt` 为后续云端同步保留了创建、更新和软删除信息。
 
 ## Swift 闭包与 Java 对照
 
@@ -233,7 +274,7 @@ English
 ```text
 RiceWeight/
 ├── RiceWeightApp.swift          # App 入口
-├── WeightRecord.swift           # 体重记录模型
+├── WeightRecord.swift           # SwiftData 本地数据库模型
 ├── ContentView.swift            # 首页、概览和历史记录列表
 ├── AddWeightRecordView.swift    # 新增记录弹窗
 ├── AppLanguage.swift            # App 支持的语言和语言偏好读取逻辑
@@ -245,7 +286,7 @@ RiceWeight/
 
 ## 后续学习路线
 
-1. 使用 SwiftData 持久化体重记录。
-2. 增加目标体重设置页面。
-3. 使用图表展示体重变化趋势。
+1. 增加目标体重设置页面。
+2. 使用图表展示体重变化趋势。
+3. 使用 iCloud 或服务器同步数据。
 4. 增加单元测试和 UI 测试。

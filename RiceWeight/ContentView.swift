@@ -8,18 +8,28 @@
 // 导入 SwiftUI 框架，才能使用 View、List、Button、Text 等界面组件。
 import SwiftUI
 
+// 导入 SwiftData，才能使用 @Query 和 modelContext 访问本地数据库。
+import SwiftData
+
 /// 应用的首页：展示体重记录，并负责新增和删除操作。
 ///
 /// `struct` 声明结构体；冒号后的 `View` 表示这个结构体遵守 SwiftUI 的 View 协议。
 struct ContentView: View {
-    /// 首页拥有记录数组，所以这里使用 `@State`。
-    /// 目前数据只保存在内存里，关闭 App 后会消失。后续可以用 SwiftData 持久化。
+    /// `modelContext` 是 SwiftData 提供的数据库操作入口。
+    /// 可以把它理解为当前页面连接到本地数据库的“会话”。
+    @Environment(\.modelContext) private var modelContext
+
+    /// `@Query` 会从 SwiftData 本地数据库中读取全部体重记录。
+    /// `filter` 只保留没有被软删除的记录。
+    /// `sort` 指定按测量时间排序，`.reverse` 表示从新到旧排列。
     ///
-    /// 方括号 `[]` 表示数组。这里先放入一条示例记录，方便启动后观察界面。
-    @State private var records = [
-        // `WeightRecord(...)` 创建一条记录；参数名让每个值的用途更清楚。
-        WeightRecord(weight: 103.6, date: Date())
-    ]
+    /// 数据库内容变化后，SwiftUI 会自动刷新使用 records 的界面。
+    @Query(
+        filter: #Predicate<WeightRecord> { $0.deletedAt == nil },
+        sort: \WeightRecord.measuredAt,
+        order: .reverse
+    )
+    private var records: [WeightRecord]
 
     /// 第一版先使用固定目标，专注理解页面状态和列表交互。
     /// 后续可以增加设置页面，让用户自行修改目标体重。
@@ -33,17 +43,11 @@ struct ContentView: View {
     /// 控制设置弹窗是否显示。
     @State private var isShowingSettings = false
 
-    /// 这是一个计算属性。每次使用它时，都返回按日期从新到旧排序后的记录数组。
-    private var sortedRecords: [WeightRecord] {
-        // `sorted` 不会修改原数组，而是返回新数组。
-        // 花括号是排序规则闭包：如果前一条日期更新，它就应该排在前面。
-        records.sorted { $0.date > $1.date }
-    }
-
     /// `WeightRecord?` 末尾的问号表示可选值：有记录时返回一条记录，没有时返回 nil。
     private var latestRecord: WeightRecord? {
-        // `first` 读取数组第一项。数组为空时，它会安全地返回 nil。
-        sortedRecords.first
+        // @Query 已经按测量时间从新到旧排序，因此第一项就是最近记录。
+        // 数组为空时，first 会安全地返回 nil。
+        records.first
     }
 
     /// 差值不会小于 0。达到或低于目标时，首页会显示“已达到目标”。
@@ -87,8 +91,8 @@ struct ContentView: View {
 
                 // 第二个 Section 用于展示历史记录列表。
                 Section(L10n.historySection) {
-                    // `ForEach` 遍历排序后的记录，为每条记录创建一行界面。
-                    ForEach(sortedRecords) { record in
+                    // `ForEach` 遍历数据库查询结果，为每条记录创建一行界面。
+                    ForEach(records) { record in
                         // `record` 是当前正在处理的那条数据。
                         WeightRecordRow(record: record)
                     }
@@ -126,8 +130,8 @@ struct ContentView: View {
                 AddWeightRecordView(
                     initialWeight: latestRecord?.weight ?? 65.5,
                     onSave: { newRecord in
-                        // `append` 把弹窗返回的新记录添加到数组末尾。
-                        records.append(newRecord)
+                        // `insert` 把弹窗返回的新记录写入 SwiftData 本地数据库。
+                        modelContext.insert(newRecord)
                     }
                 )
             }
@@ -138,17 +142,18 @@ struct ContentView: View {
         }
     }
 
-    /// `IndexSet` 中的位置来自当前正在展示的排序后数组，
-    /// 所以先取得对应记录的 id，再从原始数组中删除它们。
+    /// `IndexSet` 中的位置来自当前正在展示的 records 查询结果。
     /// `private func` 声明仅在当前类型内部使用的方法。
     private func deleteRecords(at offsets: IndexSet) {
-        // `map` 把待删除的位置转换成记录 id，避免排序导致删错数据。
-        // `$0` 表示闭包收到的当前索引值。
-        let deletedIDs = offsets.map { sortedRecords[$0].id }
-
-        // `removeAll(where:)` 删除所有符合条件的记录。
-        // `contains` 用于判断当前记录 id 是否存在于待删除 id 数组中。
-        records.removeAll { deletedIDs.contains($0.id) }
+        // 遍历用户左滑删除的位置。
+        for offset in offsets {
+            // 软删除不会立刻移除数据库中的对象，而是为记录补上删除时间。
+            // @Query 会自动隐藏 deletedAt 不为 nil 的记录。
+            let record = records[offset]
+            let now = Date()
+            record.deletedAt = now
+            record.updatedAt = now
+        }
     }
 }
 
@@ -235,7 +240,8 @@ struct WeightRecordRow: View {
         // `HStack` 把内部元素从左到右排列。
         HStack {
             // 日期格式会自动跟随用户地区，例如中文和英文环境的顺序可以不同。
-            Text(record.date, format: .dateTime.year().month().day())
+            // 时区使用记录创建时保存的值，避免用户旅行后历史日期发生偏移。
+            Text(record.measuredAt, format: dateFormat)
 
             // `Spacer` 尽可能占据中间空间，把日期和体重推向两侧。
             Spacer()
@@ -247,6 +253,17 @@ struct WeightRecordRow: View {
                 // 使用系统次要文字颜色。
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// 根据记录中保存的时区创建日期格式。
+    private var dateFormat: Date.FormatStyle {
+        let timeZone = TimeZone(identifier: record.timeZoneIdentifier) ?? .autoupdatingCurrent
+        var format = Date.FormatStyle.dateTime
+            .year()
+            .month()
+            .day()
+        format.timeZone = timeZone
+        return format
     }
 
     /// 历史记录行也需要展示体重，因此提供一个局部格式化方法。
@@ -267,4 +284,6 @@ struct WeightRecordRow: View {
 #Preview {
     // 创建 ContentView，让 Xcode 可以快速显示首页预览。
     ContentView()
+        // 预览使用内存数据库，避免预览数据写入真实 App 数据库。
+        .modelContainer(for: WeightRecord.self, inMemory: true)
 }
