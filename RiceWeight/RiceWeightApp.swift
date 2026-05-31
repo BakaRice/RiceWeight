@@ -2,7 +2,7 @@
 //  RiceWeightApp.swift
 //  RiceWeight
 //
-//  Created by 谭文韬 on 2026/5/31.
+//  Created by RiceMarch on 2026/5/31.
 //
 
 // 导入 SwiftUI 框架，才能使用 App、Scene、WindowGroup 和 View。
