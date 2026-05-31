@@ -5,7 +5,7 @@
 //  Created by Codex on 2026/5/31.
 //
 
-// 导入 SwiftUI 框架，才能使用 View、Form、TextField、DatePicker 和 Button 等界面组件。
+// 导入 SwiftUI 框架，才能使用 View、Form、Picker、DatePicker 和 Button 等界面组件。
 import SwiftUI
 
 /// 新增记录弹窗。
@@ -20,14 +20,16 @@ struct AddWeightRecordView: View {
     /// `\.dismiss` 是 KeyPath（键路径）语法，表示我们想读取名为 dismiss 的环境值。
     @Environment(\.dismiss) private var dismiss
 
-    /// 从父页面读取当前语言环境，让数字输入规则和 App 内语言保持一致。
+    /// 从父页面读取当前语言环境，让数字展示格式和 App 内语言保持一致。
     @Environment(\.locale) private var locale
 
     /// `@State` 表示视图自己拥有、并且会随交互变化的数据。
     /// 当这些值改变时，SwiftUI 会重新计算 `body`，刷新受影响的界面。
     ///
-    /// `weightText` 保存输入框中的原始字符串。初始值 `""` 表示空字符串。
-    @State private var weightText = ""
+    /// 体重选择器分成整数和小数两部分。
+    /// 它们的初始值由下方 init 方法根据最近一次记录计算出来。
+    @State private var selectedIntegerWeight: Int
+    @State private var selectedDecimalDigit: Int
 
     /// `Date()` 创建当前时间，作为日期选择器的默认值。
     @State private var selectedDate = Date()
@@ -38,32 +40,33 @@ struct AddWeightRecordView: View {
     /// java: (T)->Void
     let onSave: (WeightRecord) -> Void
 
-    /// 输入框中的字符串可能不是数字，因此保存按钮只在解析成功后启用。
-    /// `Double?` 末尾的问号表示可选值：它可能是数字，也可能因为解析失败而是 nil。
-    private var enteredWeight: Double? {
-        // `NumberFormatter` 按用户所在地区解析数字。
-        // 例如部分地区使用 `65,5`，而另一些地区使用 `65.5`。
-        let formatter = NumberFormatter()
+    /// 自定义初始化方法。
+    ///
+    /// `initialWeight` 是父页面传入的最近一次体重。
+    /// 它只是一个已经计算好的值，因此不需要像 onSave 一样使用闭包。
+    init(initialWeight: Double, onSave: @escaping (WeightRecord) -> Void) {
+        // 滚轮只支持 30.0 到 250.9 kg，先把外部传入值限制在有效范围内。
+        let clampedWeight = min(max(initialWeight, 30.0), 250.9)
 
-        // `.decimal` 表示按照普通十进制数字处理输入内容。
-        formatter.numberStyle = .decimal
+        // 乘以 10 并四舍五入，把浮点数转换成稳定的一位小数整数。
+        // 例如 65.5 会转换成 655。
+        let weightInTenths = Int((clampedWeight * 10).rounded())
 
-        // 使用 App 内选择的语言环境，兼容不同地区的小数格式。
-        formatter.locale = locale
+        // `_selectedIntegerWeight` 是 @State 在底层生成的包装器属性。
+        // 使用 State(initialValue:) 可以为滚轮状态设置动态初始值。
+        _selectedIntegerWeight = State(initialValue: weightInTenths / 10)
 
-        // `number(from:)` 尝试把字符串变成 NSNumber；失败时返回 nil。
-        // `?.doubleValue` 表示：仅在解析成功时继续读取 Double 类型的数值。
-        return formatter.number(from: weightText)?.doubleValue
+        // `%` 是取余运算符。655 % 10 得到 5，也就是小数位。
+        _selectedDecimalDigit = State(initialValue: weightInTenths % 10)
+
+        // 保存父页面传入的闭包，用户点击保存时再调用它。
+        self.onSave = onSave
     }
 
-    /// 这是一个计算属性。每次读取时都会重新执行花括号中的代码。
-    private var canSave: Bool {
-        // `guard let` 从可选值中取出真正的数字。
-        // 如果 enteredWeight 是 nil，就提前返回 false。
-        guard let enteredWeight else { return false }
-
-        // 只有大于 0 的体重才是有效输入。
-        return enteredWeight > 0
+    /// 将两个滚轮的值组合成真正保存的体重。
+    /// 例如整数 `65` 和小数位 `5` 会组合成 `65.5`。
+    private var selectedWeight: Double {
+        Double(selectedIntegerWeight) + Double(selectedDecimalDigit) / 10
     }
 
     /// 每个 SwiftUI View 都必须提供 `body`，用声明式语法描述页面长什么样。
@@ -74,11 +77,44 @@ struct AddWeightRecordView: View {
             Form {
                 // `Section` 把一组相关表单项放在一起。标题从本地化文件读取。
                 Section(L10n.recordDetailsSection) {
-                    // `$weightText` 中的 `$` 会创建双向绑定。
-                    // 用户输入文字时，SwiftUI 会自动更新 weightText。
-                    TextField(L10n.weightPlaceholder, text: $weightText)
-                        // 弹出适合输入小数的数字键盘。
-                        .keyboardType(.decimalPad)
+                    // VStack 把体重标题、当前值和滚轮从上到下排列。
+                    VStack(alignment: .leading) {
+                        // 展示字段标题。
+                        Text(L10n.weight)
+
+                        // 展示滚轮当前组合出的体重。
+                        Text(formattedWeight)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+
+                        // HStack 把整数滚轮、小数滚轮和单位横向排列。
+                        HStack(spacing: 0) {
+                            // 第一个 Picker 选择整数公斤数。
+                            Picker(L10n.weight, selection: $selectedIntegerWeight) {
+                                // `30...250` 是闭区间，表示允许选择 30 到 250。
+                                ForEach(30...250, id: \.self) { weight in
+                                    Text("\(weight)")
+                                        .tag(weight)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+
+                            // 第二个 Picker 选择一位小数。
+                            Picker(L10n.decimalDigit, selection: $selectedDecimalDigit) {
+                                ForEach(0...9, id: \.self) { digit in
+                                    Text(".\(digit)")
+                                        .tag(digit)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+
+                            // 滚轮右侧展示公斤单位。
+                            Text(L10n.kilogramShort)
+                                .font(.headline)
+                        }
+                        // 限制滚轮高度，避免占据过多页面空间。
+                        .frame(height: 150)
+                    }
 
                     // `DatePicker` 是系统日期选择器。
                     DatePicker(
@@ -113,8 +149,6 @@ struct AddWeightRecordView: View {
                         // 点击保存后，调用下方封装好的方法。
                         saveRecord()
                     }
-                    // `!` 是逻辑取反。输入无效时，禁用保存按钮。
-                    .disabled(!canSave)
                 }
             }
         }
@@ -122,21 +156,29 @@ struct AddWeightRecordView: View {
 
     /// `private func` 声明仅在当前类型内部使用的方法。
     private func saveRecord() {
-        // 再次校验输入，防止未来修改界面后意外保存无效数据。
-        guard let enteredWeight, enteredWeight > 0 else { return }
-
         // 创建 WeightRecord，并通过 onSave 闭包把新记录交回首页。
-        onSave(WeightRecord(weight: enteredWeight, date: selectedDate))
+        onSave(WeightRecord(weight: selectedWeight, date: selectedDate))
 
         // 保存成功后关闭弹窗。
         dismiss()
+    }
+
+    /// 按当前语言环境格式化体重数字。
+    private var formattedWeight: String {
+        let number = selectedWeight.formatted(
+            .number
+                .precision(.fractionLength(1))
+                .locale(locale)
+        )
+
+        return "\(number) \(L10n.kilogramShort)"
     }
 }
 
 // `#Preview` 只用于 Xcode 画布预览，不会成为正式 App 页面的一部分。
 #Preview {
     // 预览时传入一个简单闭包，在控制台输出模拟保存的记录。
-    AddWeightRecordView { record in
+    AddWeightRecordView(initialWeight: 65.5) { record in
         print("Saved record: \(record.weight) kg")
     }
 }

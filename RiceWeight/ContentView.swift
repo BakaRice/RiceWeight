@@ -121,11 +121,15 @@ struct ContentView: View {
             // `sheet` 根据绑定的 Bool 值决定是否展示模态弹窗。
             // `$isShowingAddRecord` 中的 `$` 会创建双向绑定，让弹窗关闭时状态自动同步。
             .sheet(isPresented: $isShowingAddRecord) {
-                // 创建新增页面，并传入保存闭包。
-                AddWeightRecordView (onSave: { newRecord in
-                    // `append` 把弹窗返回的新记录添加到数组末尾。
-                    records.append(newRecord)
-                })
+                // 创建新增页面。
+                // 最近记录的体重作为滚轮默认值；没有记录时使用 65.5 kg。
+                AddWeightRecordView(
+                    initialWeight: latestRecord?.weight ?? 65.5,
+                    onSave: { newRecord in
+                        // `append` 把弹窗返回的新记录添加到数组末尾。
+                        records.append(newRecord)
+                    }
+                )
             }
             // 根据 isShowingSettings 决定是否显示设置弹窗。
             .sheet(isPresented: $isShowingSettings) {

@@ -61,7 +61,7 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 4. `RiceWeight/AddWeightRecordView.swift`
    - 新增记录弹窗
    - `Form`
-   - `TextField`
+   - `Picker`
    - `DatePicker`
    - `$` 双向绑定
    - `@Environment`
@@ -103,7 +103,9 @@ RiceWeight 是一个用于学习 iOS 和 SwiftUI 开发的体重记录 Demo。
 点击首页加号后，SwiftUI 弹出 `AddWeightRecordView`。首页在创建弹窗时传入一个闭包：
 
 ```swift
-AddWeightRecordView { newRecord in
+AddWeightRecordView(
+    initialWeight: latestRecord?.weight ?? 65.5
+) { newRecord in
     records.append(newRecord)
 }
 ```
@@ -112,6 +114,7 @@ AddWeightRecordView { newRecord in
 
 ```swift
 AddWeightRecordView(
+    initialWeight: latestRecord?.weight ?? 65.5,
     onSave: { newRecord in
         records.append(newRecord)
     }
@@ -222,7 +225,8 @@ English
 
 - 日期通过 SwiftUI 的 `Date.FormatStyle` 展示，会自动适配地区顺序。
 - 数字通过 `formatted(.number...)` 展示，会自动适配小数点或小数逗号。
-- 输入通过 `NumberFormatter` 解析，兼容不同地区的小数习惯。
+- 体重通过整数和小数两个滚轮选择，避免用户输入无效数字。
+- 新增记录时，滚轮默认显示最近一次体重；没有历史记录时使用 `65.5 kg`。
 
 ## 项目结构
 

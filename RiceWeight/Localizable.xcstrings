@@ -50,11 +50,18 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新增体重" } }
       }
     },
-    "add.weight.placeholder" : {
+    "add.weight" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "For example: 65.5" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "例：65.5" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "例如：65.5" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Weight" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "体重" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "体重" } }
+      }
+    },
+    "add.weight.decimalDigit" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decimal digit" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "小数" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "小数位" } }
       }
     },
     "home.empty.description" : {

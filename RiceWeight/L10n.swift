@@ -32,7 +32,8 @@ enum L10n {
     static var done: String { text("action.done", fallback: "完了") }
     static var addWeightTitle: String { text("add.title", fallback: "体重を追加") }
     static var recordDetailsSection: String { text("add.section.details", fallback: "記録内容") }
-    static var weightPlaceholder: String { text("add.weight.placeholder", fallback: "例：65.5") }
+    static var weight: String { text("add.weight", fallback: "体重") }
+    static var decimalDigit: String { text("add.weight.decimalDigit", fallback: "小数") }
     static var date: String { text("add.date", fallback: "日付") }
     static var settingsTitle: String { text("settings.title", fallback: "設定") }
     static var language: String { text("settings.language", fallback: "言語") }
